@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # */AIPND/intropylab-classifying-images/check_images.py
 #
-# TODO: 0. Fill in your information in the programming header below
 # PROGRAMMER:   Julian Kleinz
 # DATE CREATED: 14.06.2018
 # REVISED DATE:             <=(Date Revised - if any)
@@ -32,9 +31,9 @@ from print_functions_for_lab_checks import *
 
 # Main program function defined below
 def main():
-    # TODO: 1. Define start_time to measure total program runtime by
+
     # collecting start time
-    start_time = None
+    start_time = time()
 
     # TODO: 2. Define get_input_args() function to create & retrieve command
     # line arguments
@@ -64,15 +63,17 @@ def main():
     # TODO: 7. Define print_results() function to print summary results,
     # incorrect classifications of dogs and breeds if requested.
     print_results()
+    sleep(5)
+    # collecting end time
+    end_time = time()
 
-    # TODO: 1. Define end_time to measure total program runtime
-    # by collecting end time
-    end_time = None
-
-    # TODO: 1. Define tot_time to computes overall runtime in
-    # seconds & prints it in hh:mm:ss format
-    tot_time = None
-    print("\n** Total Elapsed Runtime:", tot_time)
+    # Define overall runtime in seconds & prints it in hh:mm:ss format
+    tot_time = end_time - start_time
+    print(str(int(((tot_time % 3600) % 60))).zfill(2))
+    print("\n** Total Elapsed Runtime:", tot_time, "in seconds")
+    print("\n** Total Elapsed Runtime:", str(int((tot_time / 3600))).zfill(2) +
+          ":" + str(int(((tot_time % 3600) / 60))).zfill(2) +
+          ":" + str(int(((tot_time % 3600) % 60))).zfill(2))
 
 
 
