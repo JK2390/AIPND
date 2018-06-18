@@ -3,8 +3,8 @@
 # */AIPND/intropylab-classifying-images/check_images.py
 #
 # PROGRAMMER:   Julian Kleinz
-# DATE CREATED: 14.06.2018
-# REVISED DATE:             <=(Date Revised - if any)
+# DATE CREATED: 06/14/2018
+# REVISED DATE: 06/18/2018 <=(Date Revised - if any)
 # REVISED DATE: 05/14/2018 - added import statement that imports the print
 #                           functions that can be used to check the lab
 # PURPOSE: Check images & report results: read them in, predict their
@@ -22,6 +22,7 @@
 import argparse
 from time import time, sleep
 from os import listdir
+from os import getcwd
 
 # Imports classifier function for using CNN to classify images
 from classifier import classifier
@@ -35,19 +36,30 @@ def main():
     # collecting start time
     start_time = time()
 
-    # TODO: 2. Define get_input_args() function to create & retrieve command
+    # 2. Define get_input_args() function to create & retrieve command
     # line arguments
-    in_arg = get_input_args()
+    in_args = get_input_args()
+    print("Command Line Arguments:\n    dir =", in_args.dir,
+          "\n    arch =", in_args.arch,
+          "\n    dogfile =", in_args.dogfile)
+    path = getcwd() + "\\" + in_args.dir
 
-    # TODO: 3. Define get_pet_labels() function to create pet image labels by
+    # 3. Define get_pet_labels() function to create pet image labels by
     # creating a dictionary with key=filename and value=file label to be used
     # to check the accuracy of the classifier function
-    answers_dic = get_pet_labels()
+    answers_dic = get_pet_labels(path)
 
-    # TODO: 4. Define classify_images() function to create the classifier
+    check_creating_pet_image_labels(answers_dic)
+
+    # 4. Define classify_images() function to create the classifier
     # labels with the classifier function uisng in_arg.arch, comparing the
     # labels, and creating a dictionary of results (result_dic)
-    result_dic = classify_images()
+
+    #dictionary to store results: pet image label, classifier label,
+    #comparison of labels
+    result_dic = classify_images(path, answers_dic, "vgg")
+
+    check_classifying_images(result_dic)
 
     # TODO: 5. Define adjust_results4_isadog() function to adjust the results
     # dictionary(result_dic) to determine if classifier correctly classified
@@ -63,13 +75,13 @@ def main():
     # TODO: 7. Define print_results() function to print summary results,
     # incorrect classifications of dogs and breeds if requested.
     print_results()
-    sleep(5)
+    #sleep(5)
     # collecting end time
     end_time = time()
 
     # Define overall runtime in seconds & prints it in hh:mm:ss format
     tot_time = end_time - start_time
-    print(str(int(((tot_time % 3600) % 60))).zfill(2))
+    #print(str(int(((tot_time % 3600) % 60))).zfill(2))
     print("\n** Total Elapsed Runtime:", tot_time, "in seconds")
     print("\n** Total Elapsed Runtime:", str(int((tot_time / 3600))).zfill(2) +
           ":" + str(int(((tot_time % 3600) / 60))).zfill(2) +
@@ -99,10 +111,24 @@ def get_input_args():
     Returns:
      parse_args() -data structure that stores the command line arguments object
     """
-    pass
+    #Creates Argument Parser object named parser
+    parser = argparse.ArgumentParser()
+
+    #Argument 1: that's the path to pet_images
+    parser.add_argument('--dir', type=str, default="pet_images/",
+                        help='path to the folder my_folder')
+
+    #Argument 2: that's an the chosen CNN model
+    parser.add_argument('--arch', type=str, default="vgg",
+                        help='chosen model')
+
+    #Argument 3: that's the chosen file that contains dog labels
+    parser.add_argument('--dogfile', type=str, default="dognames.txt",
+                        help='text file including dognames')
+    return parser.parse_args()
 
 
-def get_pet_labels():
+def get_pet_labels(image_dir):
     """
     Creates a dictionary of pet labels based upon the filenames of the image
     files. Reads in pet filenames and extracts the pet image labels from the
@@ -115,10 +141,29 @@ def get_pet_labels():
      petlabels_dic - Dictionary storing image filename (as key) and Pet Image
                      Labels (as value)
     """
-    pass
+    # Get filenames from image_dir folder
+
+    pet_labels_dic = {}
+    filename_list = listdir(image_dir)
+
+    for idx in filename_list:
+        words = idx.lower().split('_')
+        pet_image = idx
+        pet_name = ""
+        for word in words:
+            if word.isalpha():
+                pet_name += word + " "
+        pet_name = pet_name.strip()
+        if pet_image not in pet_labels_dic:
+            pet_labels_dic.update({pet_image : pet_name})
+        else:
+            print("** Warning: Key=", pet_image,
+                  "already exists in pet_dic with value =", pet_name)
+
+    return pet_labels_dic
 
 
-def classify_images():
+def classify_images(images_dir, petlabel_dic, model):
     """
     Creates classifier labels with classifier function, compares labels, and
     creates a dictionary containing both labels and comparison of them to be
@@ -143,7 +188,66 @@ def classify_images():
                     idx 2 = 1/0 (int)   where 1 = match between pet image and
                     classifer labels and 0 = no match between labels
     """
-    pass
+
+    # Creates dictionary that will have all the results key = filename
+    # value = list [Pet Label, Classifier Label, Match(1=yes,0=no)]
+    results_dic = {}
+
+    for key in petlabel_dic:
+
+        # Runs classifier function to classify the images classifier function
+        # inputs: path + filename  and  model, returns model_label
+        # as classifier label
+        model_label = classifier(images_dir+key, model).lower().strip()
+
+        # defines truth as pet image label and trys to find it using find()
+        # string function to find it within classifier label(model_label).
+        # Put separate terms that 'may' compose the classifier label into a list so
+        # that each term is an item in the list.
+        model_label_list = model_label.split(", ")
+
+        # defines truth as pet image label
+        truth = petlabel_dic[key]
+
+        # If the pet image label is found within the classifier label list of terms
+        # as an exact match to on of the terms in the list - then they are added to
+        # results_dic as an exact match
+        if truth in model_label_list:
+            results_dic[key] = [truth, model_label, 1]
+
+        # For those that aren't an exact term match to a term - checks if the pet_label
+        # is part of the term like: "poodle" matching to "standard poodle" OR
+        # "cat" matching to "tabby cat"
+        else:
+            # Sets found to False - IF pet image label is FOUND as part of a term within
+            # the list of classifier label terms then will be set to True
+            found = False
+
+            # For loop to iterate through each term from model_label_list - splitting the
+            # the term into words where truth is compare to each word to see if there is
+            # a match - if so they are added to results_dic as a match and found = True
+            # and searching through the for loop is terminated using the break
+            for term in model_label_list:
+
+                # splits the term into a word list using split()
+                word_list = term.split(" ")
+
+                # if the pet image label hasn't been found AND it exists in the word list
+                # like 'poodle' in ['standard', 'poodle'] or 'cat' in ['tabby', 'cat']
+                # then found = True, the results are added to results_dic and break is
+                # used to break out of the for loop since a match was found
+                if (not found) and truth in word_list:
+                    found = True
+                    results_dic[key] = [truth, model_label, 1]
+                    break
+
+            # If pet image label isn't found within the terms that exist in the list of labels
+            # the classifier function produces then set match = 0 (not a match)
+            if not found:
+                results_dic[key] = [truth, model_label, 0]
+
+    #Return results dictionary
+    return results_dic
 
 
 def adjust_results4_isadog():
