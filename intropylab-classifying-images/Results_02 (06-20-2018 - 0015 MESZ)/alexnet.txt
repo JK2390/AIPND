@@ -1,0 +1,35 @@
+Command Line Arguments:
+    dir = pet_images/ 
+    arch = alexnet 
+    dogfile = dognames.txt
+
+ ** Statistics from calculates_results_stats() function:
+N Images: 40  N Dog Images: 30  N NotDog Images: 10 
+Pct Corr dog: 100.0 Pct Corr NOTdog: 100.0  Pct Corr Breed:  80.0
+
+ ** Check Statistics - calculated from this function as a check:
+N Images: 40  N Dog Images: 30  N NotDog Images: 10 
+Pct Corr dog: 100.0  Pct Corr NOTdog: 100.0  Pct Corr Breed:  80.0
+
+
+*** Results Summary for CNN Model Architecture ALEXNET ***
+            N Images:  40
+        N Dog Images:  30
+    N Not-Dog Images:  10
+ 
+           pct_match:  75.0
+    pct_correct_dogs: 100.0
+   pct_correct_breed:  80.0
+ pct_correct_notdogs: 100.0
+
+INCORRECT Dog Breed Assignment:
+Real: beagle                       Classifier: english foxhound              
+Real: beagle                       Classifier: walker hound, walker foxhound 
+Real: boston terrier               Classifier: basenji                       
+Real: golden retriever             Classifier: tibetan mastiff               
+Real: golden retriever             Classifier: afghan hound, afghan          
+Real: great pyrenees               Classifier: kuvasz                        
+
+** Total Elapsed Runtime: 20.510172843933105 in seconds
+
+** Total Elapsed Runtime: 00:00:20
